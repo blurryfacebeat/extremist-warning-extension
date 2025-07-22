@@ -12,12 +12,15 @@ export async function fetchDangerousKeywords(): Promise<string[]> {
   const baseUrls = lines
     .map((line) => line.split(';')[1]?.trim().toLowerCase())
     .filter(Boolean)
-    .filter((url) => isAscii(url) && (url.startsWith('http://') || url.startsWith('https://')));
+    .filter((line) => isAscii(line) && (line.includes('http://') || line.includes('https://')))
+    .flatMap((line) => {
+      const matches = line.match(/https?:\/\/[^\s"']+/gi);
+      return matches ? matches.map((u) => u.trim()) : [];
+    });
 
-  // создаём 2 версии: http и https
   const allVariants = new Set<string>();
-  for (const raw of baseUrls) {
-    const cleaned = raw.replace(/^https?:\/\//, '');
+  for (const url of baseUrls) {
+    const cleaned = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
     allVariants.add(`http://${cleaned}`);
     allVariants.add(`https://${cleaned}`);
   }

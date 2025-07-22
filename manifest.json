@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Extremist Material Warning",
+  "version": "1.0",
+  "description": "Блокирует переходы на запрещённые ресурсы с сайта Минюста РФ",
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "storage"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "dist/background.js"
+  },
+  "action": {
+    "default_title": "Защита активна"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["public/blocked.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

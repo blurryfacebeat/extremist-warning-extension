@@ -1,19 +1,31 @@
-const blockedSubstrings = [
-  "vk.com"
-];
+import { fetchDangerousKeywords } from './fetch-dangerous-list';
 
-function isBlocked(url: string): boolean {
-  return blockedSubstrings.some((entry) => url.includes(entry));
-}
+chrome.runtime.onInstalled.addListener(async () => {
+  console.log('📦 Расширение установлено. Загружаем CSV...');
 
-chrome.webRequest.onBeforeRequest.addListener(
-  (details) => {
-    const url = details.url;
-    if (isBlocked(url)) {
-      const redirect = chrome.runtime.getURL("public/blocked.html") + "?original=" + encodeURIComponent(url);
-      return { redirectUrl: redirect };
-    }
-  },
-  { urls: ["<all_urls>"], types: ["main_frame"] },
-  ["blocking"]
-);
+  const keywords = await fetchDangerousKeywords();
+
+  const rules: chrome.declarativeNetRequest.Rule[] = keywords.map(
+    (keyword: string, index: number) => ({
+      id: index + 1,
+      priority: 1,
+      action: {
+        type: 'redirect' as const,
+        redirect: {
+          url: chrome.runtime.getURL(`blocked.html?original=${encodeURIComponent(keyword)}`),
+        },
+      },
+      condition: {
+        urlFilter: keyword,
+        resourceTypes: ['main_frame'],
+      },
+    }),
+  );
+
+  await chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: rules.map((r) => r.id),
+    addRules: rules,
+  });
+
+  console.log('✅ Правила обновлены:', rules.length);
+});

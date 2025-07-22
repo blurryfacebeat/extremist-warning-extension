@@ -1,34 +1,39 @@
-function renderList(items: string[]) {
-  const list = document.getElementById('list')!;
-  list.innerHTML = '';
+function updateStatus() {
+  chrome.storage.local.get(['fetchStatus', 'lastUpdated', 'dangerousKeywords'], (res) => {
+    const status = res.fetchStatus || 'Не загружено';
+    const updated = res.lastUpdated ? new Date(res.lastUpdated).toLocaleString() : '—';
+    const list = res.dangerousKeywords || [];
 
-  for (const item of items) {
-    const li = document.createElement('li');
-    li.textContent = item;
-    list.appendChild(li);
-  }
-}
+    document.getElementById('status')!.textContent = status;
+    document.getElementById('last-updated')!.textContent = updated;
 
-function setStatus(text: string) {
-  const el = document.getElementById('status');
-  if (el) el.textContent = text;
-}
+    const ul = document.getElementById('danger-list')!;
+    ul.innerHTML = '';
+    for (const url of list.slice(0, 200)) {
+      const li = document.createElement('li');
+      li.textContent = url;
+      ul.appendChild(li);
+    }
 
-function init() {
-  const search = document.getElementById('search') as HTMLInputElement;
-
-  chrome.storage.local.get(['dangerousKeywords', 'fetchStatus'], (res) => {
-    const all = res.dangerousKeywords || [];
-    setStatus(res.fetchStatus ?? 'Нет данных');
-
-    renderList(all);
-
+    const search = document.getElementById('search')! as HTMLInputElement;
     search.addEventListener('input', () => {
-      const q = search.value.toLowerCase();
-      const filtered = all.filter((k: any) => k.includes(q));
-      renderList(filtered);
+      const value = search.value.toLowerCase();
+      ul.innerHTML = '';
+      for (const url of list) {
+        if (url.toLowerCase().includes(value)) {
+          const li = document.createElement('li');
+          li.textContent = url;
+          ul.appendChild(li);
+        }
+      }
     });
   });
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.getElementById('refresh')?.addEventListener('click', () => {
+  chrome.runtime.sendMessage({ type: 'manualRefresh' }, () => {
+    updateStatus();
+  });
+});
+
+updateStatus();

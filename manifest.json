@@ -8,7 +8,9 @@
     "declarativeNetRequestWithHostAccess",
     "storage"
   ],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -18,7 +20,11 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["blocked.html", "popup.html", "popup.css"],
+      "resources": [
+        "blocked.html",
+        "popup.html",
+        "popup.css"
+      ],
       "matches": ["<all_urls>"]
     }
   ]

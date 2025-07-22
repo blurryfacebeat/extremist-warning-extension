@@ -9,11 +9,17 @@
     <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-    <div id="app">
-        <div id="status">Загрузка...</div>
-        <input id="search" type="text" placeholder="Поиск..." />
-        <ul id="list"></ul>
+<div class="container">
+    <h1>🛡️ Мониторинг ссылок</h1>
+    <p id="status">Статус загрузки...</p>
+    <p><strong>Обновлено:</strong> <span id="last-updated">—</span></p>
+    <button id="refresh">🔄 Обновить список</button>
+    <div id="list-container">
+        <input type="text" id="search" placeholder="Поиск по ссылкам..." />
+        <ul id="danger-list"></ul>
     </div>
-    <script src="popup.js" defer></script>
+</div>
+
+<script type="module" src="popup.js"></script>
 </body>
 </html>

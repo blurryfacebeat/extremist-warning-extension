@@ -7,9 +7,23 @@ function isAscii(str: string): boolean {
 function cleanUrl(url: string): string {
   return url
     .trim()
-    .replace(/[\s'"),.;]+$/, '') // отрезаем мусор в конце
-    .replace(/^https?:\/\//, '') // убираем схему
-    .replace(/^www\./, '');
+    .replace(/[\s'"),.;]+$/g, '')
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .toLowerCase();
+}
+
+function isIgnorablePath(path: string): boolean {
+  return (
+    path === '/' ||
+    path.startsWith('/search') ||
+    path.startsWith('/results') ||
+    path.startsWith('/feed') ||
+    path.startsWith('/explore') ||
+    path.startsWith('/watch?list') ||
+    path.startsWith('/channel') ||
+    path.startsWith('/@')
+  );
 }
 
 export async function fetchDangerousKeywords(): Promise<string[]> {
@@ -18,29 +32,31 @@ export async function fetchDangerousKeywords(): Promise<string[]> {
   const lines = text.split('\n').slice(1);
 
   const rawUrls = lines.flatMap((line) => {
-    const matches = line.match(/https?:\/\/[^\s]+/gi);
+    const matches = line.match(/https?:\/\/[^\s'"),;]+/gi);
     return matches || [];
   });
 
   const allVariants = new Set<string>();
 
   for (const raw of rawUrls) {
-    const cleaned = cleanUrl(raw.toLowerCase());
+    const cleaned = cleanUrl(raw);
     if (!isAscii(cleaned)) continue;
 
-    const segments = cleaned.split('/');
-    if (segments.length <= 1 || segments[1] === '') continue; // <-- пропускаем vk.com и подобное
+    const [domain, ...pathParts] = cleaned.split('/');
+    const path = '/' + pathParts.join('/');
 
-    allVariants.add(`http://${cleaned}`);
-    allVariants.add(`https://${cleaned}`);
+    if (!pathParts.length || isIgnorablePath(path)) continue;
+
+    allVariants.add(`http://${domain}${path}`);
+    allVariants.add(`https://${domain}${path}`);
   }
 
   const result = [...allVariants];
-  console.log(`[CSV] Парсинг завершён. Итоговых ссылок: ${result.length}`);
+  console.log(`[⚠️ Parser] Готово. Найдено валидных URL: ${result.length}`);
 
   await chrome.storage.local.set({
     dangerousKeywords: result,
-    fetchStatus: `Загружено ссылок: ${result.length}`,
+    fetchStatus: `Готово: ${result.length} ссылок`,
   });
 
   return result;

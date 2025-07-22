@@ -1,31 +1,58 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Предупреждение</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Доступ ограничен</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
-            font-family: sans-serif;
-            text-align: center;
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: #fce4e4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             padding: 2rem;
-            background: #fff0f0;
-            color: #800000;
+            color: #b71c1c;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
         }
         h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
         }
         p {
-            font-size: 1.1rem;
+            font-size: 1rem;
+            color: #444;
+            margin-bottom: 0.5rem;
+        }
+        .url {
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: #c62828;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
+<div class="card">
     <h1>🚫 Доступ ограничен</h1>
-    <p>Вы пытались перейти на сайт, который может содержать экстремистские материалы.</p>
-    <div id="target">...</div>
-    <script src="blocked.js" defer></script>
+    <p>Вы пытались перейти на сайт, который может содержать запрещённые материалы.</p>
+    <div class="url" id="target">—</div>
+</div>
+<script src="blocked.js" defer></script>
 </body>
 </html>

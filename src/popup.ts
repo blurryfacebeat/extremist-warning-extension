@@ -31,8 +31,15 @@ function updateStatus() {
 }
 
 document.getElementById('refresh')?.addEventListener('click', () => {
+  const btn = document.getElementById('refresh') as HTMLButtonElement;
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Обновление...';
+
   chrome.runtime.sendMessage({ type: 'manualRefresh' }, () => {
     updateStatus();
+    btn.disabled = false;
+    btn.textContent = originalText;
   });
 });
 

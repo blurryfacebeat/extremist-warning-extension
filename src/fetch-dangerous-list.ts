@@ -7,26 +7,28 @@ function isAscii(str: string): boolean {
 export async function fetchDangerousKeywords(): Promise<string[]> {
   const response = await fetch(CSV_URL);
   const text = await response.text();
+
   const lines = text.split('\n').slice(1);
 
   const baseUrls = lines
-    .map((line) => line.split(';')[1]?.trim().toLowerCase())
-    .filter(Boolean)
-    .filter((line) => isAscii(line) && (line.includes('http://') || line.includes('https://')))
     .flatMap((line) => {
-      const matches = line.match(/https?:\/\/[^\s"']+/gi);
-      return matches ? matches.map((u) => u.trim()) : [];
-    });
+      const matches = line.match(/https?:\/\/[^\s;"']+/gi); // ищем во всей строке
+      return matches || [];
+    })
+    .filter((url) => isAscii(url));
 
   const allVariants = new Set<string>();
   for (const url of baseUrls) {
-    const cleaned = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+    const cleaned = url
+      .trim()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '');
     allVariants.add(`http://${cleaned}`);
     allVariants.add(`https://${cleaned}`);
   }
 
   const result = [...allVariants];
-  console.log(`[CSV] Загружено URL-правил: ${result.length}`);
+  console.log(`[CSV] Найдено ссылок: ${result.length}`);
 
   await chrome.storage.local.set({
     dangerousKeywords: result,
